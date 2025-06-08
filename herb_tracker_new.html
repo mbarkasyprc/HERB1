@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herb Payment & Pickup Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8fbc8f 0%, #6b8e6b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #6b8e6b;
+            border-bottom-color: #6b8e6b;
+            background: white;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #8fbc8f, #6b8e6b);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(107, 142, 107, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .add-entry-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: transform 0.2s ease;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, #8fbc8f, #6b8e6b);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .status-unpaid {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .status-returned {
+            background: #fff3cd;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .method-pickup {
+            background: #cce5ff;
+            color: #0066cc;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .method-shipping {
+            background: #e6f3ff;
+            color: #0080ff;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .edit-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .edit-btn:hover {
+            background: #138496;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-modal:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Add modal for editing -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <h2>Edit Entry</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="editName">Patient Name</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editDate">Date</label>
+                    <input type="date" id="editDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAmount">Amount ($)</label>
+                    <input type="number" id="editAmount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCategory">Category</label>
+                    <select id="editCategory" required>
+                        <option value="phyto">Phyto</option>
+                        <option value="tcm">TCM</option>
+                        <option value="access">Access Fund</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus">Status</label>
+                    <select id="editStatus" required>
+                        <option value="unpaid">Unpaid</option>
+                        <option value="paid">Paid</option>
+                        <option value="returned">Returned</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editMethod">Method</label>
+                    <select id="editMethod" required>
+                        <option value="pickup">Pick-up</option>
+                        <option value="shipping">Shipping</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editNotes">Notes</label>
+                    <textarea id="editNotes"></textarea>
+                </div>
+            </div>
+            <button class="add-btn" onclick="saveEdit()">Save Changes</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Herb Payment & Pickup Tracker</h1>
+            <p>Track and manage herb payments and pickups efficiently</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('phyto')">Phyto</button>
+            <button class="tab" onclick="switchTab('tcm')">TCM</button>
+            <button class="tab" onclick="switchTab('access')">Access Fund</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPhyto">$0.00</div>
+                <div class="stat-label">Total Phyto</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalTCM">$0.00</div>
+                <div class="stat-label">Total TCM</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalAccess">$0.00</div>
+                <div class="stat-label">Total Access Fund</div>
+            </div>
+        </div>
+
+        <div class="add-entry-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Patient Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount ($)</label>
+                    <input type="number" id="amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" required>
+                        <option value="phyto">Phyto</option>
+                        <option value="tcm">TCM</option>
+                        <option value="access">Access Fund</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" required>
+                        <option value="unpaid">Unpaid</option>
+                        <option value="paid">Paid</option>
+                        <option value="returned">Returned</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="method">Method</label>
+                    <select id="method" required>
+                        <option value="pickup">Pick-up</option>
+                        <option value="shipping">Shipping</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes"></textarea>
+                </div>
+            </div>
+            <button class="add-btn" onclick="addEntry()">Add Entry</button>
+        </div>
+
+        <div id="phytoContent" class="tab-content active">
+            <div class="table-container">
+                <table id="phytoTable">
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Method</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="tcmContent" class="tab-content">
+            <div class="table-container">
+                <table id="tcmTable">
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Method</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="accessContent" class="tab-content">
+            <div class="table-container">
+                <table id="accessTable">
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Method</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize data from localStorage or create empty arrays
+        let phytoData = JSON.parse(localStorage.getItem('phytoData')) || [];
+        let tcmData = JSON.parse(localStorage.getItem('tcmData')) || [];
+        let accessData = JSON.parse(localStorage.getItem('accessData')) || [];
+
+        // Add these new variables at the top of your script
+        let currentEditId = null;
+        let currentEditCategory = null;
+
+        // Function to save data to localStorage
+        function saveData() {
+            localStorage.setItem('phytoData', JSON.stringify(phytoData));
+            localStorage.setItem('tcmData', JSON.stringify(tcmData));
+            localStorage.setItem('accessData', JSON.stringify(accessData));
+        }
+
+        // Function to sort data by date (newest first)
+        function sortDataByDate(data) {
+            return data.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        // Function to add entry
+        function addEntry() {
+            const name = document.getElementById('name').value;
+            const date = document.getElementById('date').value;
+            const amount = document.getElementById('amount').value;
+            const category = document.getElementById('category').value;
+            const status = document.getElementById('status').value;
+            const method = document.getElementById('method').value;
+            const notes = document.getElementById('notes').value;
+
+            if (!name || !date || !amount) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const entry = {
+                name,
+                date,
+                amount,
+                category,
+                status,
+                method,
+                notes,
+                id: Date.now() // Add unique ID for each entry
+            };
+
+            // Add to appropriate array based on category
+            switch(category) {
+                case 'phyto':
+                    phytoData.push(entry);
+                    break;
+                case 'tcm':
+                    tcmData.push(entry);
+                    break;
+                case 'access':
+                    accessData.push(entry);
+                    break;
+            }
+
+            // Sort data and save to localStorage
+            phytoData = sortDataByDate(phytoData);
+            tcmData = sortDataByDate(tcmData);
+            accessData = sortDataByDate(accessData);
+            saveData();
+
+            // Update display
+            updateDisplay();
+            clearForm();
+        }
+
+        // Function to update display
+        function updateDisplay() {
+            // Update phyto table
+            const phytoTable = document.getElementById('phytoTable');
+            phytoTable.innerHTML = `
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Method</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                </tr>
+                ${phytoData.map(entry => `
+                    <tr>
+                        <td>${entry.name}</td>
+                        <td>${entry.date}</td>
+                        <td>$${entry.amount}</td>
+                        <td><span class="status-${entry.status}">${entry.status}</span></td>
+                        <td><span class="method-${entry.method}">${entry.method}</span></td>
+                        <td>${entry.notes}</td>
+                        <td>
+                            <button onclick="openEditModal('phyto', ${entry.id})" class="edit-btn">Edit</button>
+                            <button onclick="deleteEntry('phyto', ${entry.id})" class="delete-btn">Delete</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            `;
+
+            // Update TCM table
+            const tcmTable = document.getElementById('tcmTable');
+            tcmTable.innerHTML = `
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Method</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                </tr>
+                ${tcmData.map(entry => `
+                    <tr>
+                        <td>${entry.name}</td>
+                        <td>${entry.date}</td>
+                        <td>$${entry.amount}</td>
+                        <td><span class="status-${entry.status}">${entry.status}</span></td>
+                        <td><span class="method-${entry.method}">${entry.method}</span></td>
+                        <td>${entry.notes}</td>
+                        <td>
+                            <button onclick="openEditModal('tcm', ${entry.id})" class="edit-btn">Edit</button>
+                            <button onclick="deleteEntry('tcm', ${entry.id})" class="delete-btn">Delete</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            `;
+
+            // Update Access Fund table
+            const accessTable = document.getElementById('accessTable');
+            accessTable.innerHTML = `
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Method</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                </tr>
+                ${accessData.map(entry => `
+                    <tr>
+                        <td>${entry.name}</td>
+                        <td>${entry.date}</td>
+                        <td>$${entry.amount}</td>
+                        <td><span class="status-${entry.status}">${entry.status}</span></td>
+                        <td><span class="method-${entry.method}">${entry.method}</span></td>
+                        <td>${entry.notes}</td>
+                        <td>
+                            <button onclick="openEditModal('access', ${entry.id})" class="edit-btn">Edit</button>
+                            <button onclick="deleteEntry('access', ${entry.id})" class="delete-btn">Delete</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            `;
+
+            // Update statistics
+            updateStats();
+        }
+
+        // Function to delete entry
+        function deleteEntry(category, id) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                switch(category) {
+                    case 'phyto':
+                        phytoData = phytoData.filter(entry => entry.id !== id);
+                        break;
+                    case 'tcm':
+                        tcmData = tcmData.filter(entry => entry.id !== id);
+                        break;
+                    case 'access':
+                        accessData = accessData.filter(entry => entry.id !== id);
+                        break;
+                }
+                saveData();
+                updateDisplay();
+            }
+        }
+
+        // Function to clear form
+        function clearForm() {
+            document.getElementById('name').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('category').value = 'phyto';
+            document.getElementById('status').value = 'unpaid';
+            document.getElementById('method').value = 'pickup';
+            document.getElementById('notes').value = '';
+        }
+
+        // Function to update statistics
+        function updateStats() {
+            const totalPhyto = phytoData.reduce((sum, entry) => sum + parseFloat(entry.amount), 0);
+            const totalTCM = tcmData.reduce((sum, entry) => sum + parseFloat(entry.amount), 0);
+            const totalAccess = accessData.reduce((sum, entry) => sum + parseFloat(entry.amount), 0);
+
+            document.getElementById('totalPhyto').textContent = `$${totalPhyto.toFixed(2)}`;
+            document.getElementById('totalTCM').textContent = `$${totalTCM.toFixed(2)}`;
+            document.getElementById('totalAccess').textContent = `$${totalAccess.toFixed(2)}`;
+        }
+
+        // Function to switch tabs
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}Content`).classList.add('active');
+        }
+
+        // Add these new functions
+        function openEditModal(category, id) {
+            const entry = getEntryById(category, id);
+            if (entry) {
+                currentEditId = id;
+                currentEditCategory = category;
+                
+                document.getElementById('editName').value = entry.name;
+                document.getElementById('editDate').value = entry.date;
+                document.getElementById('editAmount').value = entry.amount;
+                document.getElementById('editCategory').value = entry.category;
+                document.getElementById('editStatus').value = entry.status;
+                document.getElementById('editMethod').value = entry.method;
+                document.getElementById('editNotes').value = entry.notes;
+                
+                document.getElementById('editModal').style.display = 'block';
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditId = null;
+            currentEditCategory = null;
+        }
+
+        function getEntryById(category, id) {
+            switch(category) {
+                case 'phyto':
+                    return phytoData.find(entry => entry.id === id);
+                case 'tcm':
+                    return tcmData.find(entry => entry.id === id);
+                case 'access':
+                    return accessData.find(entry => entry.id === id);
+            }
+            return null;
+        }
+
+        function saveEdit() {
+            if (!currentEditId || !currentEditCategory) return;
+
+            const editedEntry = {
+                id: currentEditId,
+                name: document.getElementById('editName').value,
+                date: document.getElementById('editDate').value,
+                amount: document.getElementById('editAmount').value,
+                category: document.getElementById('editCategory').value,
+                status: document.getElementById('editStatus').value,
+                method: document.getElementById('editMethod').value,
+                notes: document.getElementById('editNotes').value
+            };
+
+            // Remove from old category if category changed
+            if (editedEntry.category !== currentEditCategory) {
+                switch(currentEditCategory) {
+                    case 'phyto':
+                        phytoData = phytoData.filter(entry => entry.id !== currentEditId);
+                        break;
+                    case 'tcm':
+                        tcmData = tcmData.filter(entry => entry.id !== currentEditId);
+                        break;
+                    case 'access':
+                        accessData = accessData.filter(entry => entry.id !== currentEditId);
+                        break;
+                }
+            }
+
+            // Add to new category
+            switch(editedEntry.category) {
+                case 'phyto':
+                    phytoData = phytoData.filter(entry => entry.id !== currentEditId);
+                    phytoData.push(editedEntry);
+                    break;
+                case 'tcm':
+                    tcmData = tcmData.filter(entry => entry.id !== currentEditId);
+                    tcmData.push(editedEntry);
+                    break;
+                case 'access':
+                    accessData = accessData.filter(entry => entry.id !== currentEditId);
+                    accessData.push(editedEntry);
+                    break;
+            }
+
+            // Sort and save
+            phytoData = sortDataByDate(phytoData);
+            tcmData = sortDataByDate(tcmData);
+            accessData = sortDataByDate(accessData);
+            saveData();
+
+            // Update display and close modal
+            updateDisplay();
+            closeEditModal();
+        }
+
+        // Initialize display when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial active tab
+            switchTab('phyto');
+            updateDisplay();
+        });
+    </script>
+</body>
+</html> 
