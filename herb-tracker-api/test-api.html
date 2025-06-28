@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Herb Tracker API Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        const API_BASE = 'https://herb-tracker-api.herbtracker.workers.dev';
+        const results = document.getElementById('results');
+        
+        async function testAPI() {
+            try {
+                // Test health endpoint
+                results.innerHTML += '<h2>Testing Health Endpoint:</h2>';
+                const healthResponse = await fetch(`${API_BASE}/api/health`);
+                const healthData = await healthResponse.json();
+                results.innerHTML += `<p>Health: ${JSON.stringify(healthData)}</p>`;
+                
+                // Test get entries
+                results.innerHTML += '<h2>Testing Get Entries:</h2>';
+                const entriesResponse = await fetch(`${API_BASE}/api/entries`);
+                const entriesData = await entriesResponse.json();
+                results.innerHTML += `<p>Entries: ${JSON.stringify(entriesData, null, 2)}</p>`;
+                
+                // Test get entries by category
+                results.innerHTML += '<h2>Testing Get Phyto Entries:</h2>';
+                const phytoResponse = await fetch(`${API_BASE}/api/entries?category=phyto`);
+                const phytoData = await phytoResponse.json();
+                results.innerHTML += `<p>Phyto Entries: ${JSON.stringify(phytoData, null, 2)}</p>`;
+                
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Run tests when page loads
+        testAPI();
+    </script>
+</body>
+</html> 
